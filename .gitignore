@@ -1,0 +1,4 @@
+build
+!build/W_M.bin
+!build/W_M.hex
+.vscode/ipch
