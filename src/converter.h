@@ -30,7 +30,7 @@ struct In_regs {
    uint16_t modbus_address;         // 3
    uint16_t high_value;             // 4
    uint16_t low_value;              // 5
-   Control control;                 //6
+   Control control;                 // 6
 
 }__attribute__((packed));
 
