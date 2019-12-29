@@ -41,7 +41,6 @@ int main()
       , mcu::FLASH::Sector::_9
    >::make (&flash);
 
-
    volatile decltype(auto) modbus = Modbus_slave<In_regs, Out_regs>
                  ::make<mcu::Periph::USART1, TX, RX, RTS>
                        (flash.modbus_address, flash.uart_set);
