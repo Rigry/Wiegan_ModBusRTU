@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         { 
-            "name": "mcu",
+            "name": "W_M",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "arm-none-eabi-gdb",

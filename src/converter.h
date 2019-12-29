@@ -63,8 +63,9 @@ public:
 
     void operator() () {
         
-        modbus.outRegs.high_value = (wiegan.get_number() >> 16);
-        modbus.outRegs.low_value  = static_cast<uint16_t>(wiegan.get_number());
+      //   wiegan.get_number();
+        modbus.outRegs.high_value = wiegan.get_high_bits();
+        modbus.outRegs.low_value  = wiegan.get_low_bits();
 
         modbus([&](auto registr){
             static bool unblock = false;
