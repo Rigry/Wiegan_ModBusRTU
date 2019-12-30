@@ -18,6 +18,8 @@ using TX  = mcu::PA9;
 using RX  = mcu::PA10;
 using RTS = mcu::PA8;
 
+using FAC = mcu::PB4;
+
 
 
 int main()
@@ -41,14 +43,31 @@ int main()
       , mcu::FLASH::Sector::_9
    >::make (&flash);
 
+   uint8_t modbus_address{1};
+   UART::Settings uart_set = {
+      .parity_enable  = false,
+      .parity         = USART::Parity::even,
+      .data_bits      = USART::DataBits::_8,
+      .stop_bits      = USART::StopBits::_1,
+      .baudrate       = USART::Baudrate::BR9600,
+      .res            = 0
+   };
+
+   decltype(auto) factory = Pin::make<FAC,  mcu::PinMode::Input>();
+
+   if (not factory) {
+      modbus_address = flash.modbus_address;
+      uart_set = flash.uart_set;
+   }
+
    volatile decltype(auto) modbus = Modbus_slave<In_regs, Out_regs>
                  ::make<mcu::Periph::USART1, TX, RX, RTS>
-                       (flash.modbus_address, flash.uart_set);
+                       (modbus_address, uart_set);
 
    decltype(auto) wiegan = Wiegan::make<D0, D1>();
 
-   decltype(auto) led  = Pin::make<LED, mcu::PinMode::Output>();
-   decltype(auto) beep = Pin::make<BEEP, mcu::PinMode::Output>();
+   decltype(auto) led     = Pin::make<LED,  mcu::PinMode::Output>();
+   decltype(auto) beep    = Pin::make<BEEP, mcu::PinMode::Output>();
 
    using Flash  = decltype(flash);
    using Modbus = Modbus_slave<In_regs, Out_regs>;

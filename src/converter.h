@@ -96,10 +96,13 @@ public:
                    if (modbus.inRegs.control.enable) {
                       enable();
                       led = modbus.outRegs.control.enable = modbus.inRegs.control.enable;
-                   } else if (modbus.inRegs.control.disable) {
+                   } else 
+                      led = modbus.outRegs.control.enable = modbus.inRegs.control.enable;
+                   if (modbus.inRegs.control.disable) {
                       disable();
                       beep = modbus.outRegs.control.disable = modbus.inRegs.control.disable;
-                   }
+                   } else
+                      beep = modbus.outRegs.control.disable = modbus.inRegs.control.disable;
                 break;
             } // switch
         }); // modbus([&](auto registr)
