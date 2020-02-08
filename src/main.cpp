@@ -35,7 +35,10 @@ int main()
          .res            = 0
       };
       uint8_t  modbus_address = 1;
-      uint16_t model_number   = 0;
+      uint16_t qty_request    = 0;
+      uint16_t reset_time     = 0;
+      uint16_t tone_sound     = 0;
+      uint16_t version        = 1;
    }flash;
 
    [[maybe_unused]] auto _ = Flash_updater<
@@ -73,13 +76,50 @@ int main()
    using Modbus = Modbus_slave<In_regs, Out_regs>;
    Converter<Flash, Modbus> converter {wiegan, led, beep, modbus, flash};
 
-   modbus.outRegs.device_code       = 1;
-   modbus.outRegs.factory_number    = flash.factory_number;
-   modbus.outRegs.modbus_address    = flash.modbus_address;
-   modbus.outRegs.uart_set          = flash.uart_set;
-   modbus.arInRegsMax[ADR(uart_set)]= 0b11111111;
+   modbus.outRegs.qty_request    = flash.qty_request;
+   modbus.outRegs.reset_time     = flash.reset_time;
+   modbus.outRegs.tone_sound     = flash.tone_sound;
+   modbus.outRegs.modbus_address = flash.modbus_address;
+   modbus.outRegs.baudrate       = flash.uart_set.baudrate  == USART::Baudrate::BR115200 ? 6 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR57600  ? 5 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR38400  ? 4 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR28800  ? 3 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR19200  ? 2 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR14400  ? 1 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR9600   ? 0 : 255;
+   modbus.outRegs.data_bits      = flash.uart_set.data_bits == USART::DataBits::_8 ? 0 :
+                                   flash.uart_set.data_bits == USART::DataBits::_9 ? 1 : 255;
+   modbus.outRegs.parity         = (not flash.uart_set.parity_enable) ? 0 :
+                                   flash.uart_set.parity    == USART::Parity::even ? 1 :
+                                   flash.uart_set.parity    == USART::Parity::odd  ? 2 : 255;
+   modbus.outRegs.stop_bits      = flash.uart_set.stop_bits == USART::StopBits::_1 ? 0 :
+                                   flash.uart_set.stop_bits == USART::StopBits::_2 ? 1 : 255;
+   modbus.outRegs.version        = flash.version;
+
+   modbus.inRegsMin.low_bits        = 0;
+   modbus.inRegsMax.low_bits        = 0;
+   modbus.inRegsMin.high_bits       = 0;
+   modbus.inRegsMax.high_bits       = 0;
+   modbus.inRegsMin.led             = 0;
+   modbus.inRegsMax.led             = 1;
+   modbus.inRegsMin.beep            = 0;
+   modbus.inRegsMax.beep            = 1;
+   modbus.inRegsMin.qty_request     = 0;
+   modbus.inRegsMax.qty_request     = 10;
+   modbus.inRegsMin.reset_time      = 0;
+   modbus.inRegsMax.reset_time      = 10;
+   modbus.inRegsMin.tone_sound      = 0;
+   modbus.inRegsMax.tone_sound      = 2;
    modbus.inRegsMin.modbus_address  = 1;
    modbus.inRegsMax.modbus_address  = 255;
+   modbus.inRegsMin.baudrate        = 0;
+   modbus.inRegsMax.baudrate        = 6;
+   modbus.inRegsMin.data_bits       = 0;
+   modbus.inRegsMax.data_bits       = 1;
+   modbus.inRegsMin.parity          = 0;
+   modbus.inRegsMax.parity          = 2;
+   modbus.inRegsMin.stop_bits       = 0;
+   modbus.inRegsMax.stop_bits       = 1;
 
 
    while(1){
