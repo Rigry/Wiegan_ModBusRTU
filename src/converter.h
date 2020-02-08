@@ -79,9 +79,9 @@ class Converter : TickSubscriber
     void switch_beep() {
         if (modbus.inRegs.tone_sound == 0) {
             beep = static_cast<bool>(modbus.inRegs.beep);
-        } else if (modbus.inRegs.tone_sound == 1) {
+        } else if (modbus.inRegs.tone_sound == 1 and modbus.inRegs.beep) {
             beep ^= beep_long.event();
-        } else if (modbus.inRegs.tone_sound == 2) {
+        } else if (modbus.inRegs.tone_sound == 2 and modbus.inRegs.beep) {
             if (beep_short.event() and cnt != 6) {
                 cnt++;
                 beep ^= 1;
@@ -89,8 +89,10 @@ class Converter : TickSubscriber
             if (cnt == 6) {
                 pause.start(500_ms);
                 beep = false;
-                if (pause.done())
+                if (pause.done()) {
+                    pause.stop();
                     cnt = 0;
+                }
             }
         }
 
