@@ -95,9 +95,9 @@ int main()
    modbus.outRegs.version        = flash.version;
 
    modbus.inRegsMin.low_bits        = 0;
-   modbus.inRegsMax.low_bits        = 0;
+   modbus.inRegsMax.low_bits        = 65535;
    modbus.inRegsMin.high_bits       = 0;
-   modbus.inRegsMax.high_bits       = 0;
+   modbus.inRegsMax.high_bits       = 65535;
    modbus.inRegsMin.led             = 0;
    modbus.inRegsMax.led             = 1;
    modbus.inRegsMin.beep            = 0;
