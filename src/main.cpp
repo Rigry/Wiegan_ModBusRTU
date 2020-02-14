@@ -80,12 +80,10 @@ int main()
    modbus.outRegs.reset_time     = flash.reset_time;
    modbus.outRegs.tone_sound     = flash.tone_sound;
    modbus.outRegs.modbus_address = flash.modbus_address;
-   modbus.outRegs.baudrate       = flash.uart_set.baudrate  == USART::Baudrate::BR115200 ? 6 :
-                                   flash.uart_set.baudrate  == USART::Baudrate::BR57600  ? 5 :
-                                   flash.uart_set.baudrate  == USART::Baudrate::BR38400  ? 4 :
-                                   flash.uart_set.baudrate  == USART::Baudrate::BR28800  ? 3 :
-                                   flash.uart_set.baudrate  == USART::Baudrate::BR19200  ? 2 :
-                                   flash.uart_set.baudrate  == USART::Baudrate::BR14400  ? 1 :
+   modbus.outRegs.baudrate       = flash.uart_set.baudrate  == USART::Baudrate::BR115200 ? 4 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR57600  ? 3 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR38400  ? 2 :
+                                   flash.uart_set.baudrate  == USART::Baudrate::BR19200  ? 1 :
                                    flash.uart_set.baudrate  == USART::Baudrate::BR9600   ? 0 : 255;
    modbus.outRegs.data_bits      = flash.uart_set.data_bits == USART::DataBits::_8 ? 0 :
                                    flash.uart_set.data_bits == USART::DataBits::_9 ? 1 : 255;
