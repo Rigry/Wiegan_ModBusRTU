@@ -113,7 +113,7 @@ int main()
    modbus.inRegsMin.modbus_address  = 1;
    modbus.inRegsMax.modbus_address  = 255;
    modbus.inRegsMin.baudrate        = 0;
-   modbus.inRegsMax.baudrate        = 6;
+   modbus.inRegsMax.baudrate        = 4;
    modbus.inRegsMin.data_bits       = 0;
    modbus.inRegsMax.data_bits       = 1;
    modbus.inRegsMin.parity          = 0;

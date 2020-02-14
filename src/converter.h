@@ -45,6 +45,7 @@ struct Out_regs {
 }__attribute__((packed));
 
 #define ADR(reg) GET_ADR(In_regs, reg)
+#define ADR_OUT(reg) GET_ADR(Out_regs, reg)
 
 template<class Flash_data, class Modbus>
 class Converter : TickSubscriber
@@ -60,8 +61,10 @@ class Converter : TickSubscriber
     uint8_t cnt     {0};
 
     int time {0}; // время для сброса
+    int time_res{0};
+    int qty_request{0};
 
-    void reset_time (uint8_t t)
+    void reset_time (uint16_t t)
     {
         if (t == time) {
             wiegan.reset_number();
@@ -69,6 +72,15 @@ class Converter : TickSubscriber
             time = 0;
             tick_unsubscribe();
         } 
+    }
+
+    void reset_request (uint16_t qty)
+    {
+        if (qty_request >= qty) {
+            wiegan.reset_number();
+            wiegan.enable();
+            qty_request = 0;
+        }
     }
 
     void switch_led() {
@@ -117,6 +129,8 @@ public:
 
       modbus.outRegs.high_bits = wiegan.get_high_bits();
       modbus.outRegs.low_bits  = wiegan.get_low_bits();
+
+      time_res = flash.reset_time * 1000;
 
         modbus([&](auto registr){
             switch (registr) {
@@ -175,16 +189,12 @@ public:
                     if (modbus.inRegs.baudrate == 0)
                         flash.uart_set.baudrate = USART::Baudrate::BR9600;
                     else if (modbus.inRegs.baudrate == 1)
-                        flash.uart_set.baudrate = USART::Baudrate::BR14400;
-                    else if (modbus.inRegs.baudrate == 2)
                         flash.uart_set.baudrate = USART::Baudrate::BR19200;
-                    else if (modbus.inRegs.baudrate == 3)
-                        flash.uart_set.baudrate = USART::Baudrate::BR28800;
-                    else if (modbus.inRegs.baudrate == 4)
+                    else if (modbus.inRegs.baudrate == 2)
                         flash.uart_set.baudrate = USART::Baudrate::BR38400;
-                    else if (modbus.inRegs.baudrate == 5)
+                    else if (modbus.inRegs.baudrate == 3)
                         flash.uart_set.baudrate = USART::Baudrate::BR57600;
-                    else if (modbus.inRegs.baudrate == 6)
+                    else if (modbus.inRegs.baudrate == 4)
                         flash.uart_set.baudrate = USART::Baudrate::BR115200;
                 break;
                 case ADR(data_bits):
@@ -204,7 +214,7 @@ public:
                     } else if (modbus.inRegs.parity == 1) {
                         flash.uart_set.parity_enable = true;
                         flash.uart_set.parity = USART::Parity::even;
-                    } else if (modbus.inRegs.parity == 1) {
+                    } else if (modbus.inRegs.parity == 2) {
                         flash.uart_set.parity_enable = true;
                         flash.uart_set.parity = USART::Parity::odd;
                     }
@@ -218,15 +228,29 @@ public:
                         flash.uart_set.stop_bits = USART::StopBits::_2;
                 break;
             } // switch
-        }); // modbus([&](auto registr)
+        },
+            [&](auto registr){
+                switch (registr) {
+                    case ADR_OUT(low_bits):
+                        if (flash.reset_time == 0 and flash.qty_request > 0) {
+                            if (wiegan.new_card()) {
+                                wiegan.enable(false);
+                                qty_request++;
+                            }
+                            reset_request(flash.qty_request);
+                        }
+                    break;
+                }
+            }
+        ); // modbus([&](auto registr)
         switch_beep();
         switch_led();
-        if (modbus.inRegs.reset_time > 0 and modbus.inRegs.qty_request == 0) {
+        if (flash.reset_time > 0 and flash.qty_request == 0) {
             if (wiegan.new_card()) {
                 wiegan.enable(false);
                 tick_subscribe();
             }
-            reset_time(modbus.inRegs.reset_time * 1000);
+            reset_time(time_res);
         }
     } //void operator() ()
 };
