@@ -71,6 +71,7 @@ class Converter : TickSubscriber
             wiegan.enable();
             time = 0;
             tick_unsubscribe();
+            qty_request = 0;
         } 
     }
 
@@ -80,6 +81,8 @@ class Converter : TickSubscriber
             wiegan.reset_number();
             wiegan.enable();
             qty_request = 0;
+            time = 0;
+            tick_unsubscribe();
         }
     }
 
@@ -160,18 +163,14 @@ public:
                         = modbus.inRegs.beep;
                 break;
                 case ADR(qty_request):
-                    if (flash.reset_time == 0) {
-                        flash.qty_request
-                            = modbus.outRegs.qty_request
-                            = modbus.inRegs.qty_request;
-                    }
+                    flash.qty_request
+                        = modbus.outRegs.qty_request
+                        = modbus.inRegs.qty_request;
                 break;
                 case ADR(reset_time):
-                    if (flash.qty_request == 0) {
-                        flash.reset_time
-                            = modbus.outRegs.reset_time
-                            = modbus.inRegs.reset_time;
-                    }
+                    flash.reset_time
+                        = modbus.outRegs.reset_time
+                        = modbus.inRegs.reset_time;
                 break;
                 case ADR(tone_sound):
                     flash.tone_sound
@@ -232,7 +231,7 @@ public:
             [&](auto registr){
                 switch (registr) {
                     case ADR_OUT(low_bits):
-                        if (flash.reset_time == 0 and flash.qty_request > 0) {
+                        if (flash.qty_request > 0) {
                             if (wiegan.new_card()) {
                                 wiegan.enable(false);
                                 qty_request++;
@@ -245,7 +244,7 @@ public:
         ); // modbus([&](auto registr)
         switch_beep();
         switch_led();
-        if (flash.reset_time > 0 and flash.qty_request == 0) {
+        if (flash.reset_time > 0) {
             if (wiegan.new_card()) {
                 wiegan.enable(false);
                 tick_subscribe();
